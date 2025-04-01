@@ -15,7 +15,7 @@ public class JwtProvider {
 
     @Value("${jwt.secret}")
     private String secretKey;
-    
+
     private SecretKey key;
 
     @Value("${jwt.access-token-validity-in-seconds}")
@@ -31,11 +31,11 @@ public class JwtProvider {
     }
 
     public String generateAccessToken(String userId) {
-        return generateToken(userId, accessTokenValidityInSeconds * 1000);
+        return generateToken(userId, accessTokenValidityInSeconds);
     }
 
     public String generateRefreshToken(String userId) {
-        return generateToken(userId, refreshTokenValidityInSeconds * 1000);
+        return generateToken(userId, refreshTokenValidityInSeconds);
     }
 
     private String generateToken(String userId, long validityInMs) {
