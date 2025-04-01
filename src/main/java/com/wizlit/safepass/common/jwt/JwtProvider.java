@@ -1,37 +1,41 @@
 package com.wizlit.safepass.common.jwt;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.Base64;
 
 @Component
 public class JwtProvider {
 
     @Value("${jwt.secret}")
     private String secretKey;
+    
+    private SecretKey key;
 
-    @Value("${jwt.access-token-expiration}")
-    private long accessTokenExpiration;
+    @Value("${jwt.access-token-validity-in-seconds}")
+    private long accessTokenValidityInSeconds;
 
-    @Value("${jwt.refresh-token-expiration}")
-    private long refreshTokenExpiration;
+    @Value("${jwt.refresh-token-validity-in-seconds}")
+    private long refreshTokenValidityInSeconds;
 
     @PostConstruct
     protected void init() {
-        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        // 직접 바이트 배열에서 키 생성 (Base64 인코딩 단계 건너뜀)
+        key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateAccessToken(String userId) {
-        return generateToken(userId, accessTokenExpiration);
+        return generateToken(userId, accessTokenValidityInSeconds * 1000);
     }
 
     public String generateRefreshToken(String userId) {
-        return generateToken(userId, refreshTokenExpiration);
+        return generateToken(userId, refreshTokenValidityInSeconds * 1000);
     }
 
     private String generateToken(String userId, long validityInMs) {
@@ -42,7 +46,7 @@ public class JwtProvider {
                 .setSubject(userId)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(key)
                 .compact();
     }
 }

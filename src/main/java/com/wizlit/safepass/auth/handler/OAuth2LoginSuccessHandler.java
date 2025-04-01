@@ -3,10 +3,12 @@ package com.wizlit.safepass.auth.handler;
 import com.wizlit.safepass.auth.service.TokenService;
 import com.wizlit.safepass.auth.model.TokenResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wizlit.safepass.common.dto.ApiResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -37,17 +39,24 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             TokenResponse token = tokenService.createTokens(userId);
             System.out.println("토큰 발급 완료 - accessToken: " + token.getAccessToken());
 
-            response.setContentType("application/json;charset=UTF-8");
+            ApiResponse<TokenResponse> apiResponse = ApiResponse.success(token, "Login successful");
+            
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
             response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write(objectMapper.writeValueAsString(token));
-            response.flushBuffer(); // 🔥 리디렉션 차단의 핵심
+            response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+            response.flushBuffer();
         } catch (Exception e) {
             System.out.println("예외: " + e.getMessage());
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Token error: " + e.getMessage());
+            
+            ApiResponse<Void> errorResponse = ApiResponse.error("Authentication error: " + e.getMessage());
+            
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+            response.flushBuffer();
         }
     }
-
-
-
 }
