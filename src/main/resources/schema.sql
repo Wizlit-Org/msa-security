@@ -1,0 +1,9 @@
+-- 사용자 테이블 스키마
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL,
+    name VARCHAR(255),
+    picture VARCHAR(255),
+    role VARCHAR(20) NOT NULL
+);

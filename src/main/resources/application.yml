@@ -1,0 +1,62 @@
+spring:
+  config:
+    import: optional:file:./src/main/resources/application-secret.yml
+  profiles:
+    active: local  # 기본 프로필은 local 환경
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${google.client-id}
+            client-secret: ${google.client-secret}
+            scope:
+              - email
+              - profile
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+        trace: false
+
+  sql:
+    init:
+      mode: never  # SQL 스크립트 실행하지 않음
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create  # 애플리케이션 시작 시 스키마 생성
+    show-sql: true  # Hibernate 자체 로깅 비활성화 (로거를 통해서만 SQL 확인)
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
+
+jwt:
+  secret: ${jwt.secret-key}
+  access-token-validity-in-seconds: ${jwt.access-token-expiration}
+  refresh-token-validity-in-seconds: ${jwt.refresh-token-expiration}
+
+#logging:
+#  level:
+#    root: INFO
+#    org.hibernate.SQL: DEBUG  # SQL 쿼리 로깅
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # SQL 바인딩 파라미터 로깅
+#    org.springframework.security: INFO
+#    org.springframework.boot.autoconfigure.jdbc: INFO
+#    com.zaxxer.hikari: INFO
+#    com.wizlit.safepass: DEBUG
+
+
+
